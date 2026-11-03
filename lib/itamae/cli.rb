@@ -59,6 +59,7 @@ module Itamae
     option :ssh_config, type: :string
     option :vagrant, type: :boolean, default: false
     option :ask_password, type: :boolean, default: false
+    option :ask_passphrase, type: :boolean, default: false
     option :sudo, type: :boolean, default: true
     def ssh(*recipe_files)
       if recipe_files.empty?
@@ -69,7 +70,13 @@ module Itamae
         raise "Please set '-h <hostname>' or '--vagrant'"
       end
 
-      run(recipe_files, :ssh, options)
+      opts = options.dup
+      if options[:ask_passphrase]
+        opts[:passphrase] = ask("Enter passphrase for key:", echo: false)
+        puts
+      end
+
+      run(recipe_files, :ssh, opts)
     end
 
     desc "docker RECIPE [RECIPE...]", "Create Docker image"
